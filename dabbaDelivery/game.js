@@ -33,7 +33,7 @@ function startGame(){
 
   startButton.hidden = true;
   startButton.disabled = true;
- action_card.style.display = "none";
+  action_card.style.display = "none";
   timerInterval = setInterval(() => {
     timeLeft--;
     updateTimerDisplay();
