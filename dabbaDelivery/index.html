@@ -16,7 +16,7 @@
         </div>
         <div class="status-pill">
           <span id = "timer">⏱ 01:45</span>
-          <span>⭐ 0</span>
+          <span id="score">⭐ 0</span>
         </div>
       </header>
 
@@ -44,34 +44,38 @@
           <div class="stage-top">
             <div class="hud-item">
               <span>Boxes handed over</span>
-              <strong>0</strong>
+              <strong id="boxes-handed">0</strong>
             </div>
             <div class="hud-item">
               <span>Perfect builds</span>
-              <strong>0</strong>
+              <strong id="perfect-builds">0</strong>
             </div>
             <div class="hud-item">
               <span>Live orders</span>
-              <strong>3</strong>
+              <strong id="live-orders">3</strong>
             </div>
           </div>
 
           <div class="conveyor">
             <div class="conveyor-track">
-              <div class="bento-card">
-                <div class="bubble-row">
-                  <div class="bubble">🍚</div>
-                  <div class="bubble">🥣</div>
-                  <div class="bubble">🥬</div>
+              <div class="bento-card" id="bento-card">
+                <div class="bubble-row" id="bubble-row">
+                  <div class="bubble" data-slot="0">🍚</div>
+                  <div class="bubble" data-slot="1">🥣</div>
+                  <div class="bubble" data-slot="2">🥬</div>
                 </div>
 
-                <div class="bento-grid">
-                  <div class="compartment">1</div>
-                  <div class="compartment">2</div>
-                  <div class="compartment">3</div>
+                <div class="box-timer">
+                  <div class="box-timer-fill" id="box-timer-fill"></div>
                 </div>
 
-                <div class="lock-hint">Tap to lock and swipe to the rider</div>
+                <div class="bento-grid" id="bento-grid">
+                  <div class="compartment" data-slot="0" data-expects="rice">1</div>
+                  <div class="compartment" data-slot="1" data-expects="dal">2</div>
+                  <div class="compartment" data-slot="2" data-expects="sabzi">3</div>
+                </div>
+
+                <div class="lock-hint">Drag the right ingredient into each slot</div>
               </div>
 
               <div class="delivery-bike">🚲</div>
@@ -83,11 +87,11 @@
           <article class="card ingredients-card">
             <h2>Counter ingredients</h2>
             <div class="ingredient-list">
-              <div class="ingredient"><span>🍚</span> Rice</div>
-              <div class="ingredient"><span>🥣</span> Dal</div>
-              <div class="ingredient"><span>🥬</span> Sabzi</div>
-              <div class="ingredient"><span>🥟</span> Papadum</div>
-              <div class="ingredient"><span>🧂</span> Salt</div>
+              <div class="ingredient" draggable="true" data-ingredient="rice"><span>🍚</span> Rice</div>
+              <div class="ingredient" draggable="true" data-ingredient="dal"><span>🥣</span> Dal</div>
+              <div class="ingredient" draggable="true" data-ingredient="sabzi"><span>🥬</span> Sabzi</div>
+              <div class="ingredient" draggable="true" data-ingredient="papadum"><span>🥟</span> Papadum</div>
+              <div class="ingredient" draggable="true" data-ingredient="salt"><span>🧂</span> Salt</div>
             </div>
           </article>
 
