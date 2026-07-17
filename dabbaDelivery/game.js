@@ -1,6 +1,8 @@
 const startButton = document.getElementById("play-btn");
 const timerDisplay = document.getElementById("timer");
 const action_card = document.querySelector(".action-card");
+const ingredient = document.querySelector(".ingredient");
+
 
 startButton.addEventListener("click", startGame);
 let timerInterval = null;
@@ -21,6 +23,9 @@ function updateTimerDisplay() {
   timerDisplay.textContent = formatTime(timeLeft);
 }
 
+function dragIngredients(){
+ 
+}
 //start game function
 function startGame(){
   // Game start logic here
