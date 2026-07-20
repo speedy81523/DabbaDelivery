@@ -3,12 +3,14 @@ const timerDisplay = document.getElementById("timer");
 const scoreDisplay = document.getElementById("score");
 const action_card = document.querySelector(".action-card");
 const ingredientEls = document.querySelectorAll(".ingredient");
- 
+
 const bentoCard = document.getElementById("bento-card");
 const bubbleRow = document.getElementById("bubble-row");
 const bentoGrid = document.getElementById("bento-grid");
 const boxTimerFill = document.getElementById("box-timer-fill");
- 
+
+const converyorTrack = document.getElementById("conveyor-track");
+const deliveryZone = document.getElementById("delivery-zone");
 const boxesHandedDisplay = document.getElementById("boxes-handed");
 const perfectBuildsDisplay = document.getElementById("perfect-builds");
 
@@ -36,11 +38,21 @@ const INGREDIENT = {
 
 const all_ingredients = Object.keys(INGREDIENT);
 
+//boxes and belt
+const max_boxes = 1;
+const spawn_time = 4;
+const box_width = 320;
+const box_drag_type = "application/x-box-id"; // custom drag type for box drag
+let activeBoxes = []; //box info like id,el
+
+let boxIdCounter = 0;
+let spawnCooldown = 0;
+
 //current order
-let currentOrder = {};
-let mistakeMade = false;
-let boxDuration = 10;
-let boxTimeLeft = boxDuration;
+///let currentOrder = {};
+//let mistakeMade = false;
+//let boxDuration = 10;
+//let boxTimeLeft = boxDuration;
 
 
 //format time
@@ -49,153 +61,352 @@ function formatTime(totalSeconds) {
   const seconds = totalSeconds % 60;
   return `⏱ ${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
- 
+
 function updateTimerDisplay() {
   timerDisplay.textContent = formatTime(timeLeft);
 }
 
-function  updateHUD(){
+function updateHUD() {
   boxesHandedDisplay.textContent = boxesHanded;
   perfectBuildsDisplay.textContent = perfectBuilds;
 }
 
-function updateScoreDisplay(){
+function updateScoreDisplay() {
   scoreDisplay.textContent = `⭐ ${score}`;
 }
 
 //get box duration
-function getBoxDuration(){
-  const elapsedFraction = 1 - timeLeft /starting_seconds;
+function getBoxDuration() {
+  const elapsedFraction = 1 - timeLeft / starting_seconds;
   const duration = 10 - elapsedFraction * 4;
-  return Math.max(6,Math.round(duration));
+  return Math.max(6, Math.round(duration));
 }
 
 //drag ingredient
-function pickRandomIngredient(count){
+function pickRandomIngredient(count) {
   const pool = [...all_ingredients];
   const picked = [];
-  while (picked.length < count && pool.length){
+  while (picked.length < count && pool.length) {
     const idx = Math.floor(Math.random() * pool.length);
-    picked.push(pool.splice(idx,1)[0]);
+    picked.push(pool.splice(idx, 1)[0]);
   }
   return picked;
 }
 //set ingredients to lock
-function setIngredientLocked(locked){
-  ingredientEls.forEach((el) => el.classList.toggle("locked",locked));
+function setIngredientLocked(locked) {
+  ingredientEls.forEach((el) => el.classList.toggle("locked", locked));
 }
 
+//drag ingredients
 ingredientEls.forEach((ingredient) => {
-  ingredient.addEventListener("dragstart",(e) =>{
-    if (!gameActive){
+  ingredient.addEventListener("dragstart", (e) => {
+    if (!gameActive) {
       e.preventDefault();
       return;
     }
-    e.dataTransfer.setData("text/plain",ingredient.dataset.ingredient);
+    e.dataTransfer.setData("text/plain", ingredient.dataset.ingredient);
     e.dataTransfer.effectAllowed = "copy";
     ingredient.classList.add("dragging");
   });
 
-  ingredient.addEventListener("dragend",() =>{
+  ingredient.addEventListener("dragend", () => {
     ingredient.classList.remove("dragging");
   });
 });
 
-const compartments = bentoGrid.querySelectorAll(".compartment");
-compartments.forEach((compartment) =>{
-  compartment.addEventListener("dragover",(e)=>{
-    if (!gameActive) return;
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "copy";
-    compartment.classList.add("drag-over");
-  });
-  compartment.addEventListener("dragleave",()=>{
-    compartment.classList.remove("drag-over");
-  });
-  compartment.addEventListener("drop",(e)=>{
-    e.preventDefault();
-    compartment.classList.remove("drag-over");
-    if(!gameActive)
-      return;
-    if(compartment.classList.contains("filled"))
-      return;
+//const compartments = bentoGrid.querySelectorAll(".compartment");
+//compartments.forEach((compartment) => {
+  //compartment.addEventListener("dragover", (e) => {
+   // if (!gameActive) return;
+    //e.preventDefault();
+    //e.dataTransfer.dropEffect = "copy";
+    //compartment.classList.add("drag-over");
+  //});
+  //compartment.addEventListener("dragleave", () => {
+  //  compartment.classList.remove("drag-over");
+ // });
+  //compartment.addEventListener("drop", (e) => {
+    //e.preventDefault();
+   // compartment.classList.remove("drag-over");
+  //  if (!gameActive)
+    //  return;
+    //if (compartment.classList.contains("filled"))
+    //  return;
 
-    const dropped = e.dataTransfer.getData("text/plain");
-    const slot = Number(compartment.dataset.slot);
-    const expected = currentOrder[slot];
+   // const dropped = e.dataTransfer.getData("text/plain");
+    //const slot = Number(compartment.dataset.slot);
+    //const expected = currentOrder[slot];
 
-    if (dropped === expected){
-      compartment.textContent = INGREDIENT[dropped];
-      compartment.classList.add("filled");
-      checkOrderComplete();
-    }
-    else{
-      mistakeMade = true;
-      compartment.classList.add("wrong");
-      setTimeout(() => compartment.classList.remove("wrong"),350);
-    }
-  });
-});
+    //if (dropped === expected) {
+    //  compartment.textContent = INGREDIENT[dropped];
+    //  compartment.classList.add("filled");
+   //   checkOrderComplete();
+   // }
+   // else {
+    //  mistakeMade = true;
+    // compartment.classList.add("wrong");
+    //  setTimeout(() => compartment.classList.remove("wrong"), 350);
+   // }
+ // });
+//});
 
 //generating order
-function generateOrder(){
-  currentOrder = pickRandomIngredient(3);
-  mistakeMade = false;
+//function generateOrder() {
+  //currentOrder = pickRandomIngredient(3);
+ // mistakeMade = false;
 
-  compartments.forEach((compartment,i)=>{
-    compartment.dataset.expects = currentOrder[i];
-    compartment.textContent = String(i+1);
-    compartment.classList.remove("filled","wrong");
-  });
+ // compartments.forEach((compartment, i) => {
+   // compartment.dataset.expects = currentOrder[i];
+    //compartment.textContent = String(i + 1);
+    //compartment.classList.remove("filled", "wrong");
+ // });
 
-  const bubbles = bubbleRow.querySelectorAll(".bubble");
-  bubbles.forEach((bubble,i) =>{
-    bubble.textContent = INGREDIENT[currentOrder[i]];
-  });
+ // const bubbles = bubbleRow.querySelectorAll(".bubble");
+  //bubbles.forEach((bubble, i) => {
+   // bubble.textContent = INGREDIENT[currentOrder[i]];
+ // });
 
-  boxDuration = getBoxDuration();
-  boxTimeLeft = boxDuration;
-  boxTimerFill.style.width = "100%";
-  boxTimerFill.style.background = "";
+ // boxDuration = getBoxDuration();
+ // boxTimeLeft = boxDuration;
+ // boxTimerFill.style.width = "100%";
+ // boxTimerFill.style.background = "";
 
-  bentoCard.classList.remove("complete","failed");
-  bentoCard.classList.add("pop-in");
-  setTimeout(()=>bentoCard.classList.remove("pop-in"),350);
+  //bentoCard.classList.remove("complete", "failed");
+ // bentoCard.classList.add("pop-in");
+  //setTimeout(() => bentoCard.classList.remove("pop-in"), 350);
 
-}
+//}
 
 //check order is complete
-function checkOrderComplete(){
-  const allFilled = [...compartments].every((c)=>c.classList.contains("filled"));
-  if (!allFilled)
+//function checkOrderComplete() {
+  //const allFilled = [...compartments].every((c) => c.classList.contains("filled"));
+  //if (!allFilled)
+   // return;
+
+ // score += 1;
+ // boxesHanded += 1;
+ // if (!mistakeMade) {
+  //  perfectBuilds += 1;
+ // }
+ // updateScoreDisplay();
+ // updateHUD();
+
+  //bentoCard.classList.add("complete");
+  //setTimeout(() => {
+  // if (gameActive)
+   //   generateOrder();
+  ///}, 450);
+//}
+
+//fail order
+//function failOrder() {
+ // bentoCard.classList.add("failed");
+  //setTimeout(() => {
+   // if (gameActive)
+    //  generateOrder();
+  //}, 350);
+//}
+
+//dropping into box, box should be created and destroyed dynamically
+//figure which compartment is targeted
+converyorTrack.addEventListener("dragover",(e)=>{
+  const compartment = e.target.closest(".compartment");
+  if(!compartment||!gameActive)
+    return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = "copy";
+  compartment.classList.add("drag-over");
+});
+converyorTrack.addEventListener("dragleave",(e)=>{
+  const compartment = e.target.closest(".compartment");
+  if(compartment)
+    compartment.classList.remove("drag-over");
+});
+converyorTrack.addEventListener("drop",(e)=>{
+  const compartment = e.target.closest(".compartment");
+  if (!compartment||!gameActive)
+    return;
+  e.preventDefault();
+
+  compartment.classList.remove("drag-over");
+  if(compartment.classList.contains("filled"))
     return;
 
+  const boxEl = compartment.closest(".bento-box");
+  const box = activeBoxes.find((b)=>b.el === boxEl);
+  if (!box)
+    return;
+
+  const dropped = e.dataTransfer.getData("text/plain");
+  const slot = Number(compartment.dataset.slot);
+  const expected = box.order[slot];
+  
+  if (dropped === expected){
+    compartment.textContent = INGREDIENT[dropped];
+    compartment.classList.add("filled");
+    checkBoxComplete(box);    
+  }
+  else{
+    box.mistakeMade = true;
+    compartment.classList.add("wrong");
+    setTimeout(()=>compartment.classList.remove("wrong"),350);
+  }
+});
+
+function getBoxDragId(dataTransfer) {
+  if (!dataTransfer) return null;
+  return dataTransfer.getData(box_drag_type) || dataTransfer.getData("text/plain") || null;
+}
+
+//drag box to delivery
+deliveryZone.addEventListener("dragover",(e)=>{
+  if (!gameActive) 
+    return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = "move";
+  deliveryZone.classList.add("drag-over");
+});
+
+deliveryZone.addEventListener("dragleave",()=>{
+  deliveryZone.classList.remove("drag-over");
+});
+
+deliveryZone.addEventListener("drop",(e)=>{
+  deliveryZone.classList.remove("drag-over");
+  const idStr = getBoxDragId(e.dataTransfer);
+  if (!idStr || !gameActive)
+    return;
+  e.preventDefault();
+
+  const box = activeBoxes.find((b)=>b.id === Number(idStr));
+  if (!box||!box.ready) return;
+
+  deliverBox(box);
+})
+//spawn box
+function spawnBox(){
+  const order = pickRandomIngredient(3);
+  const duration = getBoxDuration();
+  const id = ++boxIdCounter;
+
+  const el = document.createElement("div");
+  el.className = "bento-box pop-in";
+  el.style.left = `-${box_width+ 20}px`;
+  el.innerHTML = `
+    <div class="bubble-row">
+      <div class="bubble">${INGREDIENT[order[0]]}</div>
+      <div class="bubble">${INGREDIENT[order[1]]}</div>
+      <div class="bubble">${INGREDIENT[order[2]]}</div>
+    </div>
+    <div class="box-timer"><div class="box-timer-fill"></div></div>
+    <div class="bento-grid">
+      <div class="compartment" data-slot="0">1</div>
+      <div class="compartment" data-slot="1">2</div>
+      <div class="compartment" data-slot="2">3</div>
+    </div>
+    <div class="lock-hint">Drag the right ingredient into each slot</div>
+  `;
+  converyorTrack.appendChild(el);
+  setTimeout(()=>el.classList.remove("pop-in"),350);
+  
+  const box = {
+    id,
+    el,
+    compartments: el.querySelectorAll(".compartment"),
+    timerFill: el.querySelector(".box-timer-fill"),
+    lockHint: el.querySelector(".lock-hint"),
+    order,
+    mistakeMade: false,
+    elapsed: 0,
+    duration,
+    ready: false, //true when all compartments are filled
+    delivered: false, //true when dropped at bike
+  };
+
+  //box becomes draggable
+  el.draggable = true;
+  el.addEventListener("dragstart",(e)=>{
+    if(!box.ready || box.delivered){
+      e.preventDefault();
+      return;
+    }
+    e.dataTransfer.setData("text/plain", String(box.id));
+    e.dataTransfer.setData(box_drag_type, String(box.id));
+    e.dataTransfer.effectAllowed = "move";
+    el.classList.add("dragging");
+  });
+  el.addEventListener("dragend",()=>{
+    el.classList.remove("dragging");
+  });
+  activeBoxes.push(box);
+}
+
+//remove box from DOM after exit animation
+function removeBox(box){
+  activeBoxes = activeBoxes.filter((b)=>b.id !== box.id);
+  box.el.addEventListener("animationend",()=> box.el.remove(),{once: true});
+  setTimeout(()=>box.el.remove(),600);//in case animation end dosen't play
+}
+
+//check if order is complete for box
+function checkBoxComplete(box){
+  const allFilled = [...box.compartments].every((c)=>c.classList.contains("filled"));
+  if(!allFilled)
+    return;
+  box.ready = true;
+  box.el.classList.add("ready");
+  box.timerFill.style.width = "100%";
+  box.timerFill.style.background = "var(--accent-3)";
+  box.lockHint.textContent = "Drag this box down to the van!";
+}
+
+//box delivered
+function deliverBox(box){
+  box.delivered = true;
   score += 1;
   boxesHanded += 1;
-  if (!mistakeMade){
+  if(!box.mistakeMade){
     perfectBuilds += 1;
   }
   updateScoreDisplay();
   updateHUD();
-
-  bentoCard.classList.add("complete");
-  setTimeout(()=>{
-    if(gameActive)
-      generateOrder();
-  },450);
+  box.el.classList.remove("ready")
+  box.el.classList.add("delivered");
+  removeBox(box);
 }
 
-//fail order
-function failOrder(){
-  bentoCard.classList.add("failed");
-  setTimeout(()=>{
-    if(gameActive)
-      generateOrder();
-  },350);
+//box ran out of time before completed
+function missBox(box){
+  box.el.classList.add("failed");
+  removeBox(box);
 }
 
+//belt ticks (spawn and moving boxes)
+function tickBelt(){
+  const trackWidth = converyorTrack.clientWidth;
+  const travelDistance = trackWidth + box_width + 40;
+
+  activeBoxes.forEach((box)=>{
+    box.elapsed += 1;
+    const pct = Math.min(1,box.elapsed/box.duration);
+    box.el.style.left = `${-(box_width + 20) + pct * travelDistance}px`;
+
+    const remainingPct = Math.max(0,(1-pct)*100);
+    box.timerFill.style.width = `${remainingPct}%`;
+    box.timerFill.style.background = remainingPct < 30 ? "#e05252" : "";
+
+    if (pct >= 1 && !box.delivered){
+      missBox(box);
+    }
+  });
+  spawnCooldown -= 1;
+  if (spawnCooldown <= 0 && activeBoxes.length < max_boxes){
+    spawnBox();
+    spawnCooldown = spawn_time;
+  }
+}
 //start game function
-function startGame(){
+function startGame() {
   // Game start logic here
   clearInterval(timerInterval);
 
@@ -206,6 +417,9 @@ function startGame(){
   perfectBuilds = 0;
   gameActive = true;
 
+  activeBoxes.forEach((box) => box.el.remove());
+  activeBoxes = [];
+  spawnCooldown = 0; //spawn one box right away
 
   updateTimerDisplay();
   updateScoreDisplay();
@@ -216,38 +430,31 @@ function startGame(){
   startButton.disabled = true;
   action_card.style.display = "none";
 
-  generateOrder();
-  timerInterval = setInterval(() => {
+  timerInterval = setInterval(()=>{
     timeLeft--;
     updateTimerDisplay();
- 
-    boxTimeLeft--;
-    const pct = Math.max(0,(boxTimeLeft/boxDuration)*100);
-    boxTimerFill.style.width = `${pct}%`;
-    if (pct<30){
-      boxTimerFill.style.background = "#e05252";
-    }
-    if (boxTimeLeft <= 0){
-      failOrder();
-    }
-    if (timeLeft <= 0) {
+    tickBelt();
+
+    if(timeLeft<=0){
       endGame();
     }
-  }, 1000);
+  },1000);
+   
 }
 
 //end game function
-function endGame(){
-    clearInterval(timerInterval);
-    timerInterval = null;
-    gameActive = false;
+function endGame() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  gameActive = false;
 
-    timerDisplay.textContent = "⏱ 00:00";
-    startButton.hidden = false;
-    startButton.disabled = false;
-    startButton.textContent = "▶ Play Again";
-    action_card.style.display = "flex";
+  timerDisplay.textContent = "⏱ 00:00";
+  startButton.hidden = false;
+  startButton.disabled = false;
+  startButton.textContent = "▶ Play Again";
+  action_card.style.display = "flex";
 
-    setIngredientLocked(true);
-    bentoCard.classList.remove("complete","failed","pop-in");
+  setIngredientLocked(true);
+  activeBoxes.forEach((box)=>box.el.remove());
+  activeBoxes = [];
 }
