@@ -129,7 +129,7 @@ h1{
   background: linear-gradient(90deg,var(--accent),var(--accent-2));
   border-radius: inherit;
 }
-
+ 
 .game-stage{
   display:flex;
   flex-direction: column;
@@ -182,8 +182,12 @@ h1{
 }
 
 @keyframes beltScroll{
-  from { background-position: 0 0;}
-  to {background-position: -36px 0 ;}
+  from { 
+    background-position: 0 0;
+  }
+  to {
+    background-position: -36px 0 ;
+  }
 }
 .conveyor-track {
   position: relative;
@@ -357,6 +361,7 @@ h1{
 
 .bento-box.ready {
   cursor: grab;
+  touch-action: none;
   box-shadow: 0 0 0 4px rgba(79, 138, 100, 0.35), 0 16px 34px rgba(88, 54, 12, 0.16);
 }
 
@@ -366,6 +371,16 @@ h1{
 
 .bento-box.dragging {
   opacity: 0.4;
+}
+.drag-ghost{
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.9;
+  transform:scale(1.03);
+  transition: none !important;
 }
 
 .bento-box.delivered {
@@ -476,12 +491,22 @@ h1{
   }
 
   .conveyor-track {
-    flex-direction: column;
+    min-height: 280px;
+  }
+
+  .conveyor {
+    padding: 14px;
+  }
+
+  .delivery-zone {
+    flex-wrap: wrap;
     justify-content: center;
+    text-align: center;
+    padding: 12px 16px;
   }
 
   .delivery-bike {
-    font-size: 3.8rem;
+    font-size: 2.6rem;
   }
 }
 
@@ -500,5 +525,24 @@ h1{
 
   .compartment {
     min-height: 64px;
+  }
+
+  .status-pill span {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+
+  .conveyor-track {
+    min-height: 240px;
+  }
+
+  .bubble {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+
+  .delivery-hint {
+    font-size: 0.85rem;
   }
 }

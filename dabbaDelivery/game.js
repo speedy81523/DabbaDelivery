@@ -42,7 +42,7 @@ const all_ingredients = Object.keys(INGREDIENT);
 const max_boxes = 1;
 const spawn_time = 4;
 const box_width = 320;
-const box_drag_type = "application/x-box-id"; // custom drag type for box drag
+//const box_drag_type = "application/x-box-id"; // custom drag type for box drag
 let activeBoxes = []; //box info like id,el
 
 let boxIdCounter = 0;
@@ -97,22 +97,23 @@ function setIngredientLocked(locked) {
   ingredientEls.forEach((el) => el.classList.toggle("locked", locked));
 }
 
+//new system for drag and drop also work for phone touch
 //drag ingredients
-ingredientEls.forEach((ingredient) => {
-  ingredient.addEventListener("dragstart", (e) => {
-    if (!gameActive) {
-      e.preventDefault();
-      return;
-    }
-    e.dataTransfer.setData("text/plain", ingredient.dataset.ingredient);
-    e.dataTransfer.effectAllowed = "copy";
-    ingredient.classList.add("dragging");
-  });
+//ingredientEls.forEach((ingredient) => {
+ // ingredient.addEventListener("dragstart", (e) => {
+   // if (!gameActive) {
+    //  e.preventDefault();
+     // return;
+   // }
+   // e.dataTransfer.setData("text/plain", ingredient.dataset.ingredient);
+   // e.dataTransfer.effectAllowed = "copy";
+   // ingredient.classList.add("dragging");
+  //});
 
-  ingredient.addEventListener("dragend", () => {
-    ingredient.classList.remove("dragging");
-  });
-});
+ // ingredient.addEventListener("dragend", () => {
+  //  ingredient.classList.remove("dragging");
+  //});
+//});
 
 //const compartments = bentoGrid.querySelectorAll(".compartment");
 //compartments.forEach((compartment) => {
@@ -207,82 +208,234 @@ ingredientEls.forEach((ingredient) => {
   //}, 350);
 //}
 
-//dropping into box, box should be created and destroyed dynamically
-//figure which compartment is targeted
-converyorTrack.addEventListener("dragover",(e)=>{
-  const compartment = e.target.closest(".compartment");
-  if(!compartment||!gameActive)
-    return;
-  e.preventDefault();
-  e.dataTransfer.dropEffect = "copy";
-  compartment.classList.add("drag-over");
-});
-converyorTrack.addEventListener("dragleave",(e)=>{
-  const compartment = e.target.closest(".compartment");
-  if(compartment)
-    compartment.classList.remove("drag-over");
-});
-converyorTrack.addEventListener("drop",(e)=>{
-  const compartment = e.target.closest(".compartment");
-  if (!compartment||!gameActive)
-    return;
-  e.preventDefault();
-
-  compartment.classList.remove("drag-over");
-  if(compartment.classList.contains("filled"))
-    return;
-
-  const boxEl = compartment.closest(".bento-box");
-  const box = activeBoxes.find((b)=>b.el === boxEl);
-  if (!box)
-    return;
-
-  const dropped = e.dataTransfer.getData("text/plain");
-  const slot = Number(compartment.dataset.slot);
-  const expected = box.order[slot];
-  
-  if (dropped === expected){
-    compartment.textContent = INGREDIENT[dropped];
-    compartment.classList.add("filled");
-    checkBoxComplete(box);    
-  }
-  else{
-    box.mistakeMade = true;
-    compartment.classList.add("wrong");
-    setTimeout(()=>compartment.classList.remove("wrong"),350);
-  }
-});
-
-function getBoxDragId(dataTransfer) {
-  if (!dataTransfer) return null;
-  return dataTransfer.getData(box_drag_type) || dataTransfer.getData("text/plain") || null;
+let activeDrag = null;
+//floating element
+function createGhost(sourceEl,x,y){
+  const rect = sourceEl.getBoundingClientRect();
+  const ghost = sourceEl.cloneNode(true);
+  ghost.classList.add("drag-ghost");
+  ghost.style.width = `${rect.width}px`;
+  ghost.style.left = `${x - rect.width / 2}px`;
+  ghost.style.top = `${y - rect.height / 2}px`;
+  document.body.appendChild(ghost);
+  return ghost;
 }
 
+function moveGhost(ghost, x, y) {
+  const rect = ghost.getBoundingClientRect();
+  ghost.style.left = `${x - rect.width / 2}px`;
+  ghost.style.top = `${y - rect.height / 2}px`;
+}
+
+function clearHighlight(){
+  if(activeDrag && activeDrag.highlightEl){
+    activeDrag.highlightEl.classList.remove("drag-over");
+    activeDrag.highlightEl = null;
+  }
+}
+
+function endDrag(){
+  if(!activeDrag) 
+    return;
+  activeDrag.ghost.remove();
+  clearHighlight();
+  activeDrag = null;
+}
+
+//dropping into box, box should be created and destroyed dynamically
+//figure which compartment is targeted
+//converyorTrack.addEventListener("dragover",(e)=>{
+ // const compartment = e.target.closest(".compartment");
+ // if(!compartment||!gameActive)
+   // return;
+  //e.preventDefault();
+  //e.dataTransfer.dropEffect = "copy";
+  //compartment.classList.add("drag-over");
+//});
+//converyorTrack.addEventListener("dragleave",(e)=>{
+  //const compartment = e.target.closest(".compartment");
+ // if(compartment)
+   // compartment.classList.remove("drag-over");
+//});
+//converyorTrack.addEventListener("drop",(e)=>{
+  //const compartment = e.target.closest(".compartment");
+  //if (!compartment||!gameActive)
+   // return;
+ // e.preventDefault();
+
+  //compartment.classList.remove("drag-over");
+  //i//f(compartment.classList.contains("filled"))
+   // return;
+
+ // const boxEl = compartment.closest(".bento-box");
+ // const box = activeBoxes.find((b)=>b.el === boxEl);
+  //if (!box)
+  //  return;
+
+ // const dropped = e.dataTransfer.getData("text/plain");
+  //const slot = Number(compartment.dataset.slot);
+  //const expected = box.order[slot];
+  
+  //if (dropped === expected){
+  //  compartment.textContent = INGREDIENT[dropped];
+ // //  compartment.classList.add("filled");
+  //  checkBoxComplete(box);    
+ // }
+ // else{
+  //  box.mistakeMade = true;
+   // compartment.classList.add("wrong");
+  //  setTimeout(()=>compartment.classList.remove("wrong"),350);
+ // }
+//});
+
+ingredientEls.forEach((ingredient) =>{
+  ingredient.addEventListener("pointerdown",(e)=>{
+    if(!gameActive || ingredient.classList.contains("locked"))
+      return;
+    e.preventDefault();
+    ingredient.setPointerCapture(e.pointerId);
+    ingredient.classList.add("dragging");
+
+    activeDrag = {
+      type: "ingredient",
+      pointerId: e.pointerId,
+      sourceEl: ingredient,
+      ingredientName: ingredient.dataset.ingredient,
+      ghost: createGhost(ingredient, e.clientX, e.clientY),
+      highlightEl: null,
+    };
+  });
+  ingredient.addEventListener("pointermove",(e)=>{
+    if(!activeDrag||activeDrag.pointerId !== e.pointerId|| activeDrag.type !== "ingredient")
+      return;
+    moveGhost(activeDrag.ghost,e.clientX,e.clientY);
+
+    const target = document.elementFromPoint(e.clientX,e.clientY);
+    const compartment = target && target.closest(".compartment");
+    if(activeDrag.highlightEl && activeDrag.highlightEl !== compartment){
+      clearHighlight();
+    }
+    if (compartment && !compartment.classList.contains("filled")){
+      compartment.classList.add("drag-over");
+      activeDrag.highlightEl = compartment;
+    }
+  });
+  ingredient.addEventListener("pointerup",(e)=>{
+    if(!activeDrag||activeDrag.pointerId !== e.pointerId || activeDrag.type !== "ingredient")
+      return;
+    ingredient.classList.remove("dragging");
+    const target = document.elementFromPoint(e.clientX,e.clientY);
+    const compartment = target && target.closest(".compartment");
+
+    if(compartment && !compartment.classList.contains("filled")){
+      const boxEl = compartment.closest(".bento-box");
+      const box = activeBoxes.find((b)=>b.el===boxEl);
+      if (box){
+        const slot = Number(compartment.dataset.slot);
+        const expected = box.order[slot];
+
+        if (activeDrag.ingredientName === expected){
+          compartment.textContent = INGREDIENT[activeDrag.ingredientName];
+          compartment.classList.add("filled");
+          checkBoxComplete(box);
+        }
+        else{
+          box.mistakeMade = true;
+          compartment.classList.add("wrong");
+          setTimeout(()=>compartment.classList.remove("wrong"),350);
+        }
+      }
+    }
+    endDrag();
+  });
+  ingredient.addEventListener("pointercancel",()=>{
+    ingredient.classList.remove("dragging");
+    endDrag();
+  });
+
+});
+
+//dragging finised box onto van
+function attachBoxDragHandlers(box){
+  const el = box.el;
+  
+  el.addEventListener("pointerdown",(e)=>{
+    if (!box.ready || box.delivered)
+      return;
+    e.preventDefault();
+    el.setPointerCapture(e.pointerId);
+    el.classList.add("dragging");
+
+    activeDrag = {
+      type: "box",
+      pointerId: e.pointerId,
+      box,
+      ghost: createGhost(el, e.clientX, e.clientY),
+      highlightEl: null,
+    };
+  });
+  el.addEventListener("pointermove",(e)=>{
+    if (!activeDrag || activeDrag.pointerId !== e.pointerId || activeDrag.type !== "box" || activeDrag.box !== box) return;
+    moveGhost(activeDrag.ghost, e.clientX, e.clientY);
+ 
+    const target = document.elementFromPoint(e.clientX, e.clientY);
+    const overZone = target && target.closest("#delivery-zone");
+ 
+    if (overZone) {
+      deliveryZone.classList.add("drag-over");
+      activeDrag.highlightEl = deliveryZone;
+    }
+     else {
+      clearHighlight();
+    }
+  });
+  el.addEventListener("pointerup",(e)=>{
+    if(!activeDrag || activeDrag.pointerId !== e.pointerId || activeDrag.type !== "box" || activeDrag.box !== box)
+      return;
+    el.classList.remove("dragging");
+
+    const target = document.elementFromPoint(e.clientX,e.clientY);
+    const overZone = target && target.closest("#delivery-zone");
+    if(overZone){
+      deliverBox(box);
+    }
+    endDrag();
+  });
+  el.addEventListener("pointercancel",()=>{
+    el.classList.remove("dragging");
+    endDrag();
+  });
+}
+//function getBoxDragId(dataTransfer) {
+ // if (!dataTransfer) return null;
+ // return dataTransfer.getData(box_drag_type) || dataTransfer.getData("text/plain") || null;
+//}
+
 //drag box to delivery
-deliveryZone.addEventListener("dragover",(e)=>{
-  if (!gameActive) 
-    return;
-  e.preventDefault();
-  e.dataTransfer.dropEffect = "move";
-  deliveryZone.classList.add("drag-over");
-});
+//deliveryZone.addEventListener("dragover",(e)=>{
+ // if (!gameActive) 
+  //  return;
+  //e.preventDefault();
+  //e.dataTransfer.dropEffect = "move";
+  ////deliveryZone.classList.add("drag-over");
+//});
 
-deliveryZone.addEventListener("dragleave",()=>{
-  deliveryZone.classList.remove("drag-over");
-});
+//deliveryZone.addEventListener("dragleave",()=>{
+ // deliveryZone.classList.remove("drag-over");
+//});
 
-deliveryZone.addEventListener("drop",(e)=>{
-  deliveryZone.classList.remove("drag-over");
-  const idStr = getBoxDragId(e.dataTransfer);
-  if (!idStr || !gameActive)
-    return;
-  e.preventDefault();
+//deliveryZone.addEventListener("drop",(e)=>{
+  //deliveryZone.classList.remove("drag-over");
+  //const idStr = getBoxDragId(e.dataTransfer);
+  //if (!idStr || !gameActive)
+  //  return;
+  //e.preventDefault();
 
-  const box = activeBoxes.find((b)=>b.id === Number(idStr));
-  if (!box||!box.ready) return;
-
-  deliverBox(box);
-})
+  //const box = activeBoxes.find((b)=>b.id === Number(idStr));
+  //if (!box||!box.ready) return;
+//
+  //deliverBox(box);
+//})
 //spawn box
 function spawnBox(){
   const order = pickRandomIngredient(3);
@@ -323,21 +476,7 @@ function spawnBox(){
     delivered: false, //true when dropped at bike
   };
 
-  //box becomes draggable
-  el.draggable = true;
-  el.addEventListener("dragstart",(e)=>{
-    if(!box.ready || box.delivered){
-      e.preventDefault();
-      return;
-    }
-    e.dataTransfer.setData("text/plain", String(box.id));
-    e.dataTransfer.setData(box_drag_type, String(box.id));
-    e.dataTransfer.effectAllowed = "move";
-    el.classList.add("dragging");
-  });
-  el.addEventListener("dragend",()=>{
-    el.classList.remove("dragging");
-  });
+  attachBoxDragHandlers(box);
   activeBoxes.push(box);
 }
 
@@ -385,19 +524,23 @@ function missBox(box){
 function tickBelt(){
   const trackWidth = converyorTrack.clientWidth;
   const travelDistance = trackWidth + box_width + 40;
+  const firstBox = activeBoxes[0];
+  const boxWidth = firstBox ? firstBox.el.offsetWidth : box_width;
+
 
   activeBoxes.forEach((box)=>{
-    box.elapsed += 1;
-    const pct = Math.min(1,box.elapsed/box.duration);
-    box.el.style.left = `${-(box_width + 20) + pct * travelDistance}px`;
-
-    const remainingPct = Math.max(0,(1-pct)*100);
-    box.timerFill.style.width = `${remainingPct}%`;
-    box.timerFill.style.background = remainingPct < 30 ? "#e05252" : "";
-
-    if (pct >= 1 && !box.delivered){
-      missBox(box);
-    }
+   if(box.ready)
+    return;
+   box.elapsed += 1;
+   const pct = Math.min(1,box.elapsed/box.duration);
+   box.el.style.left = `${-(boxWidth + 20) + pct * travelDistance}px`
+   const remainingPct = Math.max(0, (1 - pct) * 100);
+   box.timerFill.style.width = `${remainingPct}%`;
+   box.timerFill.style.background = remainingPct < 30 ? "#e05252" : "";
+ 
+   if (pct >= 1) {
+     missBox(box);
+   }
   });
   spawnCooldown -= 1;
   if (spawnCooldown <= 0 && activeBoxes.length < max_boxes){
@@ -417,6 +560,7 @@ function startGame() {
   perfectBuilds = 0;
   gameActive = true;
 
+  endDrag();
   activeBoxes.forEach((box) => box.el.remove());
   activeBoxes = [];
   spawnCooldown = 0; //spawn one box right away
@@ -448,6 +592,7 @@ function endGame() {
   timerInterval = null;
   gameActive = false;
 
+  endDrag();
   timerDisplay.textContent = "⏱ 00:00";
   startButton.hidden = false;
   startButton.disabled = false;
