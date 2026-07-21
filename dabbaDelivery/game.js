@@ -75,10 +75,10 @@ function updateScoreDisplay() {
   scoreDisplay.textContent = `⭐ ${score}`;
 }
 
-//get box duration
+//get box duration (movement speed ramps up)
 function getBoxDuration() {
   const elapsedFraction = 1 - timeLeft / starting_seconds;
-  const duration = 10 - elapsedFraction * 4;
+  const duration = 15 - elapsedFraction * 4;
   return Math.max(6, Math.round(duration));
 }
 
@@ -462,6 +462,7 @@ function spawnBox(){
   converyorTrack.appendChild(el);
   setTimeout(()=>el.classList.remove("pop-in"),350);
   
+  //box details
   const box = {
     id,
     el,
