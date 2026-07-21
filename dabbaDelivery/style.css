@@ -16,6 +16,7 @@
 
 body {
   margin: 0;
+  /*overscroll-behavior: none;*/
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: var(--text);
   background: linear-gradient(135deg, #fff4d9 0%, var(--bg) 100%);
@@ -191,7 +192,7 @@ h1{
 }
 .conveyor-track {
   position: relative;
-  min-height: 360px;
+  min-height: 780px;
   padding: 18px 10px 40px;
   overflow: hidden;
 }
@@ -492,7 +493,7 @@ h1{
   }
 
   .conveyor-track {
-    min-height: 280px;
+    min-height: 700px;
   }
 
   .conveyor {
@@ -534,7 +535,7 @@ h1{
   }
 
   .conveyor-track {
-    min-height: 240px;
+    min-height: 620px;
   }
 
   .bubble {

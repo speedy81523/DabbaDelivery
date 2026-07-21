@@ -38,8 +38,13 @@ const INGREDIENT = {
 
 const all_ingredients = Object.keys(INGREDIENT);
 
+//lanes
+const lane_count = 3;
+const lane_gap = 14; //gap px between lanes
+let laneOccupants = new Array(lane_count).fill(null);
+
 //boxes and belt
-const max_boxes = 1;
+//const max_boxes = 1;
 const spawn_time = 4;
 const box_width = 320;
 //const box_drag_type = "application/x-box-id"; // custom drag type for box drag
@@ -78,10 +83,23 @@ function updateScoreDisplay() {
 //get box duration (movement speed ramps up)
 function getBoxDuration() {
   const elapsedFraction = 1 - timeLeft / starting_seconds;
-  const duration = 15 - elapsedFraction * 4;
+  const duration = 12 - elapsedFraction * 4;
   return Math.max(6, Math.round(duration));
 }
 
+//get num of boxes allowed on belt, used with getboxduration
+function getMaxBoxes(){
+  const elapsedFunction = 1 - timeLeft/starting_seconds;
+  if(elapsedFunction >= 0.66) //time elapsed omst, full rush hour
+    return 3;
+  if (elapsedFunction >= 0.33)
+    return 2
+  return 1;
+}
+function findFreeLane(){
+  return laneOccupants.findIndex((occupant)=>occupant===null); //find empty lane
+
+}
 //drag ingredient
 function pickRandomIngredient(count) {
   const pool = [...all_ingredients];
@@ -438,6 +456,9 @@ function attachBoxDragHandlers(box){
 //})
 //spawn box
 function spawnBox(){
+  const lane = findFreeLane();
+  if (lane === -1)
+    return;
   const order = pickRandomIngredient(3);
   const duration = getBoxDuration();
   const id = ++boxIdCounter;
@@ -462,10 +483,13 @@ function spawnBox(){
   converyorTrack.appendChild(el);
   setTimeout(()=>el.classList.remove("pop-in"),350);
   
+  const boxHeight = el.offsetHeight;
+  el.style.top = `${18 + lane * (boxHeight + lane_gap)}px}`;
   //box details
   const box = {
     id,
     el,
+    lane,
     compartments: el.querySelectorAll(".compartment"),
     timerFill: el.querySelector(".box-timer-fill"),
     lockHint: el.querySelector(".lock-hint"),
@@ -477,6 +501,9 @@ function spawnBox(){
     delivered: false, //true when dropped at bike
   };
 
+  laneOccupants[lane] = box; //reserve lane
+
+ 
   attachBoxDragHandlers(box);
   activeBoxes.push(box);
 }
@@ -484,13 +511,14 @@ function spawnBox(){
 //remove box from DOM after exit animation
 function removeBox(box){
   activeBoxes = activeBoxes.filter((b)=>b.id !== box.id);
+  laneOccupants[box.lane] = null; //free lane
   box.el.addEventListener("animationend",()=> box.el.remove(),{once: true});
   setTimeout(()=>box.el.remove(),600);//in case animation end dosen't play
 }
 
 //check if order is complete for box
 function checkBoxComplete(box){
-  const allFilled = [...box.compartments].every((c)=>c.classList.contains("filled"));
+  const allFilled = [...box.compartments].every((c)=>c.classList.contains("filled")); //check if every compartment is filled
   if(!allFilled)
     return;
   box.ready = true;
@@ -544,7 +572,7 @@ function tickBelt(){
    }
   });
   spawnCooldown -= 1;
-  if (spawnCooldown <= 0 && activeBoxes.length < max_boxes){
+  if (spawnCooldown <= 0 && activeBoxes.length < getMaxBoxes()){
     spawnBox();
     spawnCooldown = spawn_time;
   }
@@ -564,6 +592,7 @@ function startGame() {
   endDrag();
   activeBoxes.forEach((box) => box.el.remove());
   activeBoxes = [];
+  laneOccupants = new Array(lane_count).fill(null);
   spawnCooldown = 0; //spawn one box right away
 
   updateTimerDisplay();
@@ -603,4 +632,5 @@ function endGame() {
   setIngredientLocked(true);
   activeBoxes.forEach((box)=>box.el.remove());
   activeBoxes = [];
+  laneOccupants = new Array(lane_count).fill(null);
 }
