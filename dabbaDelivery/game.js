@@ -509,7 +509,7 @@ function deliverBox(box){
   }
   updateScoreDisplay();
   updateHUD();
-  box.el.classList.remove("ready")
+  box.el.classList.remove("ready");
   box.el.classList.add("delivered");
   removeBox(box);
 }
