@@ -96,6 +96,7 @@ function getMaxBoxes(){
     return 2
   return 1;
 }
+
 function findFreeLane(){
   return laneOccupants.findIndex((occupant)=>occupant===null); //find empty lane
 
