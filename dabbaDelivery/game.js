@@ -582,7 +582,7 @@ function startGame() {
     if(timeLeft<=0){
       endGame();
     }
-  },1000);
+  },800);
    
 }
 
