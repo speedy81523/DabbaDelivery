@@ -187,12 +187,12 @@ h1{
     background-position: 0 0;
   }
   to {
-    background-position: -36px 0 ;
+    background-position: 36px 0 ;
   }
 }
 .conveyor-track {
   position: relative;
-  min-height: 360px;
+  min-height: 480px;
   padding: 18px 10px 40px;
   overflow: hidden;
 }
@@ -202,56 +202,93 @@ h1{
   top: 18px;
   left: -340px;
   width: min(100%, 320px);
-  padding: 20px;
-  border-radius: 24px;
+  padding: 13px;
+  border-radius: 20px;
   background: var(--panel-strong);
   border: 2px solid #f0c88f;
-  box-shadow: 0 16px 34px rgba(88, 54, 12, 0.16);
+  box-shadow: 0 12px 26px rgba(88, 54, 12, 0.16);
   transition: left 1s linear;
   z-index: 1;
+}
+
+.bento-box::before{
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 16px;
+  right: 16px;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg,transparent,#c97a3d,transparent);
+  opacity: 0.6;
 }
 
 .bubble-row {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 14px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .bubble{
-  width: 42px;
-  height: 42px;
+  width: 30px;
+  height: 30px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   background: #ffe4b3;
   border: 2px solid #efc377;
-  font-size: 1.1rem;
+  font-size: 0.9rem;
 }
 
 .bento-grid{
   display:grid;
-  grid-template-columns: repeat(3,1fr);
-  gap: 10px;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 6px;
+  grid-template-rows: repeat(2,1fr);
+  padding: 6px;
+  border-radius: 14px;
+  background: #d8b479;
+  box-shadow: inset 0 2px 6px rgba(88,54,12,0.35);
 }
 
 .compartment {
-  min-height: 76px;
-  border: 2px dashed #f1b469;
-  border-radius: 16px;
+  min-height: 34px;
+  border: none;
+  border-radius: 10px;
   background: #fff7e9;
+  box-shadow: inset 0 1px 3px rgba(88,54,12,0.18);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
+  font-size: 0.9rem;
   color: #8a5527;
+}
+
+/*comparments for bentos*/
+.compartment[data-slot="0"]{
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  font-size: 1.2rem;
+}
+
+.compartment[data-slot="1"]{
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.compartment[data-slot="2"]{
+  grid-column: 2;
+  grid-row: 2;
 }
 
 .lock-hint{
   margin-top:14px;
   text-align: center;
   font-weight: 700;
+  font-size: 0.78rem;
   color: var(--accent);
 }
 
@@ -319,11 +356,11 @@ h1{
 }
 
 .box-timer{
-  height: 6px;
+  height: 5px;
   border-radius: 999px;
   background: #f7e4bd;
   overflow: hidden;
-  margin-bottom: 14px;
+  margin-bottom: 8px;
 }
 
 .box-timer-fill {
@@ -340,19 +377,18 @@ h1{
 
 .compartment.drag-over {
   background: #ffe9c2;
-  border-color: var(--accent);
+  box-shadow: inset 0 1px 3px rgba(88,54,12,0.18),0 0 0 3px var(--accent);
   transform: scale(1.04);
 }
 
 .compartment.filled {
-  border-style: solid;
-  border-color: var(--accent-3);
+  box-shadow: inset 0 1px 3px rgba(88,54,12,0.18),0 0 0 3px var(--accent);
   background: #eaf7ec;
   font-size: 1.6rem;
 }
 
 .compartment.wrong {
-  border-color: #e05252;
+  box-shadow: inset 0 1px 3px rgba(88,54,12,0.18),0 0 0 3px var(--accent);
   background: #ffe7e7;
   animation: shake 0.35s ease;
 }
@@ -493,7 +529,7 @@ h1{
   }
 
   .conveyor-track {
-    min-height: 360px;
+    min-height: 440px;
   }
 
   .conveyor {
@@ -522,11 +558,11 @@ h1{
   }
 
   .bento-grid {
-    gap: 8px;
+    gap: 6px;
   }
 
   .compartment {
-    min-height: 64px;
+    min-height: 28px;
   }
 
   .status-pill span {
@@ -535,13 +571,13 @@ h1{
   }
 
   .conveyor-track {
-    min-height: 340px;
+    min-height: 410px;
   }
 
   .bubble {
-    width: 36px;
-    height: 36px;
-    font-size: 1rem;
+    width: 26px;
+    height: 26px;
+    font-size: 0.85rem;
   }
 
   .delivery-hint {

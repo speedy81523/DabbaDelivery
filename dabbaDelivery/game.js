@@ -40,7 +40,8 @@ const all_ingredients = Object.keys(INGREDIENT);
 
 //lanes
 const lane_count = 2;
-const lane_gap = 10; //gap px between lanes
+const lane_gap = 10; //gap px between stacked rows
+const stack_box_height = 220; //estimated box height for vertical stacking
 let laneOccupants = new Array(lane_count).fill(null);
 
 //boxes and belt
@@ -89,17 +90,18 @@ function getBoxDuration() {
 
 //get num of boxes allowed on belt, used with getboxduration
 function getMaxBoxes(){
-  const elapsedFunction = 1 - timeLeft/starting_seconds;
-  if(elapsedFunction >= 0.66) //time elapsed omst, full rush hour
-    return 3;
-  if (elapsedFunction >= 0.33)
-    return 2
+  const elapsedFraction = 1 - timeLeft / starting_seconds;
+  if(elapsedFraction >= 0.5)
+    return 2;
   return 1;
 }
 
 function findFreeLane(){
   return laneOccupants.findIndex((occupant)=>occupant===null); //find empty lane
-
+}
+//on top of each other
+function getBoxTopOffset(lane) {
+  return 18 + lane * (stack_box_height + lane_gap);
 }
 //drag ingredient
 function pickRandomIngredient(count) {
@@ -484,8 +486,7 @@ function spawnBox(){
   converyorTrack.appendChild(el);
   setTimeout(()=>el.classList.remove("pop-in"),350);
   
-  const boxHeight = el.offsetHeight;
-  el.style.top = `${18 + lane * (boxHeight + lane_gap)}px}`;
+  el.style.top = `${getBoxTopOffset(lane)}px`;
   //box details
   const box = {
     id,
