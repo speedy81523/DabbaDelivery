@@ -192,7 +192,7 @@ h1{
 }
 .conveyor-track {
   position: relative;
-  min-height: 780px;
+  min-height: 360px;
   padding: 18px 10px 40px;
   overflow: hidden;
 }
@@ -493,7 +493,7 @@ h1{
   }
 
   .conveyor-track {
-    min-height: 700px;
+    min-height: 360px;
   }
 
   .conveyor {
@@ -535,7 +535,7 @@ h1{
   }
 
   .conveyor-track {
-    min-height: 620px;
+    min-height: 340px;
   }
 
   .bubble {

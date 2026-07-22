@@ -39,8 +39,8 @@ const INGREDIENT = {
 const all_ingredients = Object.keys(INGREDIENT);
 
 //lanes
-const lane_count = 3;
-const lane_gap = 14; //gap px between lanes
+const lane_count = 2;
+const lane_gap = 10; //gap px between lanes
 let laneOccupants = new Array(lane_count).fill(null);
 
 //boxes and belt
