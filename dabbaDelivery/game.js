@@ -36,6 +36,7 @@ const INGREDIENT = {
   salt: "🧂",
 }
 
+
 const all_ingredients = Object.keys(INGREDIENT);
 
 //lanes
