@@ -30,7 +30,7 @@ let timeLeft = starting_seconds;
 //ingredients
 const INGREDIENT = {
   rice: "🍚",
-  dal: "🥣",
+  chicken: "🍗",
   sabzi: "🥬",
   papadum: "🥟",
   salt: "🧂",
