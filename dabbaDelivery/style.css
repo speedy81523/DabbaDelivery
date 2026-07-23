@@ -132,9 +132,44 @@ h1{
 }
  
 .game-stage{
+  position: relative;
   display:flex;
   flex-direction: column;
   gap: 16px;
+}
+.rush-hour-banner{
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%,-50%)scale(0.4);
+  z-index: 20;
+  padding: 14px 28px;
+  border-radius: 999px;
+  background: linear-gradient(120deg,#ff8c42,#ff5f5f);
+  color: white;
+  font-weight: 800;
+  font-size: 1.3rem;
+  letter-spacing: 0.03em;
+  box-shadow: 0 14px 30px rgba(150,40,20,0.35);
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.rush-hour-banner.show{
+  animation: rushHourPop 2.2s ease forwards;
+}
+
+@keyframes rushHourPop{
+ 0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+  12%  { opacity: 1; transform: translate(-50%, -50%) scale(1.15); } /* overshoot - the actual "pop" */
+  20%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }    /* settle back to normal size */
+  35%  { opacity: 0.25; }  /* flash off */
+  45%  { opacity: 1; }     /* flash on */
+  58%  { opacity: 0.25; }  /* flash off */
+  68%  { opacity: 1; }     /* flash on */
+  85%  { opacity: 1; }     /* brief hold */
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.85); } /* fade out and gone */
 }
 
 .stage-top{
@@ -494,6 +529,74 @@ h1{
   
 }
 
+.game-over-overlay{
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(47,36,29,0.55);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 100;
+}
+
+.game-over-overlay.show{
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.game-over-card{
+  background: var(--panel-strong);
+  border-radius:28px;
+  padding:36px 40px;
+  text-align: center;
+  max-width: 90vw;
+  box-shadow: 0 24px 60px rgba(47,26,10,0.35);
+  transform: scale(0.7);
+  opacity: 0;
+}
+
+.game-over-overlay.show .game-over-card{
+  animation: gameOverPop 0.45s ease forwards;
+}
+
+@keyframes gameOverPop {
+  0%   { opacity: 0; transform: scale(0.7); }
+  60%  { opacity: 1; transform: scale(1.06); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.game-over-label{
+  margin: 0 0 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.game-over-score-label{
+  margin: 0 0 2px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.game-over-score{
+  margin: 0 0 12px;
+  font-size: 3.4rem;
+  font-weight: 800;
+  color: var(--accent-3);
+}
+
+.game-over-stats{
+  margin: 0 0 24px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
 @keyframes bob {
   0%,
   100% {

@@ -14,14 +14,22 @@ const deliveryZone = document.getElementById("delivery-zone");
 const boxesHandedDisplay = document.getElementById("boxes-handed");
 const perfectBuildsDisplay = document.getElementById("perfect-builds");
 
+const gameOverOverlay = document.getElementById("game-over-overlay");
+const finalScoreDisplay = document.getElementById("final-score");
+const finalBoxesDisplay = document.getElementById("final-boxes");
+const finalPerfectDisplay = document.getElementById("final-perfect");
+const playAgainButton = document.getElementById("play-again-btn");
+
 
 startButton.addEventListener("click", startGame);
+playAgainButton.addEventListener("click",startGame);
 let timerInterval = null;
 let score = 0;
 let orders = 0;
 let boxesHanded = 0;
 let perfectBuilds = 0;
 let gameActive = false;
+let rushHourAnnounced = false;
 
 
 const starting_seconds = 105;
@@ -95,6 +103,20 @@ function getMaxBoxes(){
   if(elapsedFraction >= 0.5)
     return 2;
   return 1;
+}
+
+//rush hour banner
+function maybeAnnounceRushHour(){
+  if(rushHourAnnounced)
+    return;
+  if(getMaxBoxes()<2)
+  return;
+
+  rushHourAnnounced = true;
+  const banner = document.getElementById("rush-hour-banner");
+  banner.classList.remove("show");
+  void banner.offsetWidth;
+  banner.classList.add("show");
 }
 
 function findFreeLane(){
@@ -554,6 +576,8 @@ function missBox(box){
 
 //belt ticks (spawn and moving boxes)
 function tickBelt(){
+
+  maybeAnnounceRushHour();
   const trackWidth = converyorTrack.clientWidth;
   const travelDistance = trackWidth + box_width + 40;
   const firstBox = activeBoxes[0];
@@ -591,6 +615,9 @@ function startGame() {
   boxesHanded = 0;
   perfectBuilds = 0;
   gameActive = true;
+  rushHourAnnounced = false;
+  document.getElementById("rush-hour-banner").classList.remove("show");
+  gameOverOverlay.classList.remove("show");
 
   endDrag();
   activeBoxes.forEach((box) => box.el.remove());
@@ -627,13 +654,18 @@ function endGame() {
 
   endDrag();
   timerDisplay.textContent = "⏱ 00:00";
-  startButton.hidden = false;
-  startButton.disabled = false;
-  startButton.textContent = "▶ Play Again";
-  action_card.style.display = "flex";
+  //startButton.hidden = false;
+  //startButton.disabled = false;
+  //startButton.textContent = "▶ Play Again";
+  //action_card.style.display = "flex";
 
   setIngredientLocked(true);
   activeBoxes.forEach((box)=>box.el.remove());
   activeBoxes = [];
   laneOccupants = new Array(lane_count).fill(null);
+
+  finalScoreDisplay.textContent = `⭐ ${score}`;
+  finalBoxesDisplay.textContent = boxesHanded;
+  finalPerfectDisplay.textContent = perfectBuilds;
+  gameOverOverlay.classList.add("show");
 }
