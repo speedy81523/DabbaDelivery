@@ -500,9 +500,9 @@ function spawnBox(){
     </div>
     <div class="box-timer"><div class="box-timer-fill"></div></div>
     <div class="bento-grid">
-      <div class="compartment" data-slot="0">1</div>
-      <div class="compartment" data-slot="1">2</div>
-      <div class="compartment" data-slot="2">3</div>
+      <div class="compartment" data-slot="0">${INGREDIENT[order[0]]}</div>
+      <div class="compartment" data-slot="1">${INGREDIENT[order[1]]}</div>
+      <div class="compartment" data-slot="2">${INGREDIENT[order[2]]}</div>
     </div>
     <div class="lock-hint">Drag the right ingredient into each slot</div>
   `;
