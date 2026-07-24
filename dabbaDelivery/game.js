@@ -35,22 +35,28 @@ let rushHourAnnounced = false;
 const starting_seconds = 105;
 let timeLeft = starting_seconds;
 
+const BASE = {
+  rice: "🍚",
+  roti: "🫓",
+}
+
+
 //ingredients
 const INGREDIENT = {
   rice: "🍚",
   chicken: "🍗",
   sabzi: "🥬",
   papadum: "🥟",
-  salt: "🧂",
 }
 
-
+const ITEM_EMOJI = {...BASE,...INGREDIENT};
+const all_bases = Object.keys(BASE);
 const all_ingredients = Object.keys(INGREDIENT);
 
 //lanes
 const lane_count = 2;
 const lane_gap = 10; //gap px between stacked rows
-const stack_box_height = 220; //estimated box height for vertical stacking
+//const stack_box_height = 220; //estimated box height for vertical stacking
 let laneOccupants = new Array(lane_count).fill(null);
 
 //boxes and belt
@@ -93,7 +99,7 @@ function updateScoreDisplay() {
 //get box duration (movement speed ramps up)
 function getBoxDuration() {
   const elapsedFraction = 1 - timeLeft / starting_seconds;
-  const duration = 11 - elapsedFraction * 4;
+  const duration = 13 - elapsedFraction * 4;
   return Math.max(6, Math.round(duration));
 }
 
@@ -123,8 +129,8 @@ function findFreeLane(){
   return laneOccupants.findIndex((occupant)=>occupant===null); //find empty lane
 }
 //on top of each other
-function getBoxTopOffset(lane) {
-  return 18 + lane * (stack_box_height + lane_gap);
+function getBoxTopOffset(lane,boxHeight) {
+  return 18 + lane * (boxHeight + lane_gap);
 }
 //drag ingredient
 function pickRandomIngredient(count) {
@@ -135,6 +141,14 @@ function pickRandomIngredient(count) {
     picked.push(pool.splice(idx, 1)[0]);
   }
   return picked;
+}
+
+function pickRandomBase(){
+  return all_bases[Math.floor(Math.random()*all_bases.length)];
+}
+
+function getExpectedItem(box,slot){
+  return slot === 0 ? box.order.base : box.order.ingredients[slot-1];
 }
 //set ingredients to lock
 function setIngredientLocked(locked) {
@@ -376,10 +390,10 @@ ingredientEls.forEach((ingredient) =>{
       const box = activeBoxes.find((b)=>b.el===boxEl);
       if (box){
         const slot = Number(compartment.dataset.slot);
-        const expected = box.order[slot];
+        const expected = getExpectedItem(box,slot);
 
         if (activeDrag.ingredientName === expected){
-          compartment.textContent = INGREDIENT[activeDrag.ingredientName];
+          compartment.textContent = ITEM_EMOJI[activeDrag.ingredientName];
           compartment.classList.add("filled");
           checkBoxComplete(box);
         }
@@ -485,26 +499,30 @@ function spawnBox(){
   const lane = findFreeLane();
   if (lane === -1)
     return;
-  const order = pickRandomIngredient(3);
+  const base = pickRandomBase();
+  const ingredients = pickRandomIngredient(3);
+  const order = {base,ingredients};
   const duration = getBoxDuration();
   const id = ++boxIdCounter;
 
   const el = document.createElement("div");
   el.className = "bento-box pop-in";
-  el.style.left = `-${box_width+ 20}px`;
+  el.style.left = `-${box_width + 20}px`;
   el.innerHTML = `
-    <div class="bubble-row">
-      <div class="bubble">${INGREDIENT[order[0]]}</div>
-      <div class="bubble">${INGREDIENT[order[1]]}</div>
-      <div class="bubble">${INGREDIENT[order[2]]}</div>
+   <div class="bubble-row">
+      <div class="bubble bubble-base">${ITEM_EMOJI[base]}</div>
+      <div class="bubble">${ITEM_EMOJI[ingredients[0]]}</div>
+      <div class="bubble">${ITEM_EMOJI[ingredients[1]]}</div>
+      <div class="bubble">${ITEM_EMOJI[ingredients[2]]}</div>
     </div>
     <div class="box-timer"><div class="box-timer-fill"></div></div>
     <div class="bento-grid">
-      <div class="compartment" data-slot="0">${INGREDIENT[order[0]]}</div>
-      <div class="compartment" data-slot="1">${INGREDIENT[order[1]]}</div>
-      <div class="compartment" data-slot="2">${INGREDIENT[order[2]]}</div>
+      <div class="compartment" data-slot="0">${ITEM_EMOJI[base]}</div>
+      <div class="compartment" data-slot="1">${ITEM_EMOJI[ingredients[0]]}</div>
+      <div class="compartment" data-slot="2">${ITEM_EMOJI[ingredients[1]]}</div>
+      <div class="compartment" data-slot="3">${ITEM_EMOJI[ingredients[2]]}</div>
     </div>
-    <div class="lock-hint">Drag the right ingredient into each slot</div>
+    <div class="lock-hint">Base goes in the big slot - fill the rest to match</div>
   `;
   converyorTrack.appendChild(el);
   setTimeout(()=>el.classList.remove("pop-in"),350);
