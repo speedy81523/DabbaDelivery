@@ -64,6 +64,8 @@ bgm.volume = 0.35;
 bgm.preload = "auto";
 
 const sfxLibrary = {};
+
+//template sound
 Object.keys(SOUND_SRC).forEach((key) => {
   if (key === "bgm") 
     return;
