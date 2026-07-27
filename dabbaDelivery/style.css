@@ -647,9 +647,6 @@ h1{
     align-items: flex-start;
   }
 
-  .conveyor-track {
-    min-height: 440px;
-  }
 
   .conveyor {
     padding: 14px;
@@ -681,7 +678,7 @@ h1{
   }
 
   .compartment {
-    min-height: 28px;
+    min-height: 24px;
   }
 
   .status-pill span {
@@ -689,9 +686,6 @@ h1{
     font-size: 0.9rem;
   }
 
-  .conveyor-track {
-    min-height: 410px;
-  }
 
   .bubble {
     width: 26px;
@@ -701,5 +695,46 @@ h1{
 
   .delivery-hint {
     font-size: 0.85rem;
+  }
+}
+
+@media (max-height: 700px){
+  .app-shell{
+    padding: 14px;
+  }
+
+  .top-bar{
+    padding: 12px 18px;
+    margin-bottom: 12px;
+  }
+
+  .game-layout{
+    gap: 12px;
+  }
+
+  .card{
+    padding: 12px;
+  }
+
+  .conveyor{
+    padding: 10px;
+  }
+}
+
+@media(max-height: 480px){
+  .conveyor-track{
+    min-height: clamp(180px,40vh,300px);
+  }
+
+  .delivery-bike{
+    font-size: 2rem;
+  }
+
+  .ingredient-group-label{
+    margin: 8px 0 6px
+  }
+
+  .hud-item{
+    padding: 8px 10px;
   }
 }
