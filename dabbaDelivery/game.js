@@ -1,4 +1,5 @@
 const startButton = document.getElementById("play-btn");
+const mobileStartButton = document.getElementById("play-btn-mobile");
 const timerDisplay = document.getElementById("timer");
 const scoreDisplay = document.getElementById("score");
 const action_card = document.querySelector(".action-card");
@@ -20,8 +21,13 @@ const finalBoxesDisplay = document.getElementById("final-boxes");
 const finalPerfectDisplay = document.getElementById("final-perfect");
 const playAgainButton = document.getElementById("play-again-btn");
 
+const testaudio = new Audio("audio/sound");
 
-startButton.addEventListener("click", startGame);
+[startButton, mobileStartButton].forEach((button) => {
+  if (button) {
+    button.addEventListener("click", startGame);
+  }
+});
 playAgainButton.addEventListener("click",startGame);
 let timerInterval = null;
 let score = 0;
@@ -62,7 +68,6 @@ let laneOccupants = new Array(lane_count).fill(null);
 //boxes and belt
 //const max_boxes = 1;
 const spawn_time = 4;
-const box_width = 320;
 //const box_drag_type = "application/x-box-id"; // custom drag type for box drag
 let activeBoxes = []; //box info like id,el
 
@@ -495,6 +500,11 @@ function attachBoxDragHandlers(box){
   //deliverBox(box);
 //})
 //spawn box
+function getBoxWidth() {
+  const trackWidth = converyorTrack.clientWidth || 320;
+  return Math.min(320, Math.max(220, Math.min(trackWidth - 24, 300)));
+}
+
 function spawnBox(){
   const lane = findFreeLane();
   if (lane === -1)
@@ -505,9 +515,11 @@ function spawnBox(){
   const duration = getBoxDuration();
   const id = ++boxIdCounter;
 
+  const boxWidth = getBoxWidth();
   const el = document.createElement("div");
   el.className = "bento-box pop-in";
-  el.style.left = `-${box_width + 20}px`;
+  el.style.width = `${boxWidth}px`;
+  el.style.left = `-${boxWidth + 20}px`;
   el.innerHTML = `
    <div class="bubble-row">
       <div class="bubble bubble-base">${ITEM_EMOJI[base]}</div>
@@ -597,9 +609,9 @@ function tickBelt(){
 
   maybeAnnounceRushHour();
   const trackWidth = converyorTrack.clientWidth;
-  const travelDistance = trackWidth + box_width + 40;
+  const travelDistance = trackWidth + getBoxWidth() + 40;
   const firstBox = activeBoxes[0];
-  const boxWidth = firstBox ? firstBox.el.offsetWidth : box_width;
+  const boxWidth = firstBox ? firstBox.el.offsetWidth : getBoxWidth();
 
 
   activeBoxes.forEach((box)=>{
@@ -648,8 +660,14 @@ function startGame() {
   updateHUD();
   setIngredientLocked(false);
 
-  startButton.hidden = true;
-  startButton.disabled = true;
+  if (startButton) {
+    startButton.hidden = true;
+    startButton.disabled = true;
+  }
+  if (mobileStartButton) {
+    mobileStartButton.hidden = true;
+    mobileStartButton.disabled = true;
+  }
   action_card.style.display = "none";
 
   timerInterval = setInterval(()=>{
