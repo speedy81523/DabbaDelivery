@@ -21,6 +21,106 @@ const finalPerfectDisplay = document.getElementById("final-perfect");
 const playAgainButton = document.getElementById("play-again-btn");
 
 
+// ============================================================
+//   sounds/backing-track.mp3   looping background music, keep it fairly
+//                              short/loop-friendly (10-30s) and upbeat,
+//                              kitchen/market vibe. Total game round is
+//                              ~1:45 so it'll loop 3-6 times.
+//   sounds/sfx-click.mp3       button press (play / play again)
+//   sounds/sfx-correct.mp3     ingredient dropped in the right compartment
+//   sounds/sfx-wrong.mp3       ingredient dropped in the wrong compartment
+//   sounds/sfx-box-ready.mp3   a box is fully built and ready to deliver
+//   sounds/sfx-deliver.mp3     box successfully dropped on the delivery zone
+//   sounds/sfx-miss.mp3        box ran out of time before being delivered
+//   sounds/sfx-rush-hour.mp3   rush hour banner pops up
+
+// ============================================================
+
+const SOUND_SRC = {
+  bgm: "sounds/backing-track.mp3",
+  click: "sounds/sfx-click.mp3",
+  correct: "sounds/sfx-correct.mp3",
+  wrong: "sounds/sfx-wrong.mp3",
+  ready: "sounds/sfx-box-ready.mp3",
+  deliver: "sounds/sfx-deliver.mp3",
+  miss: "sounds/sfx-miss.mp3",
+  rushHour: "sounds/sfx-rush-hour.mp3",
+};
+
+const SFX_VOLUME = {
+  click: 0.6,
+  correct: 0.55,
+  wrong: 0.55,
+  ready: 0.7,
+  deliver: 0.75,
+  miss: 0.6,
+  rushHour: 0.8,
+  gameOver: 0.8,
+};
+
+const bgm = new Audio(SOUND_SRC.bgm);
+bgm.loop = true;
+bgm.volume = 0.35;
+bgm.preload = "auto";
+
+const sfxLibrary = {};
+Object.keys(SOUND_SRC).forEach((key) => {
+  if (key === "bgm") 
+    return;
+  const audio = new Audio(SOUND_SRC[key]);
+  audio.preload = "auto";
+  audio.volume = SFX_VOLUME[key] ?? 0.7;
+  sfxLibrary[key] = audio;
+});
+
+let audioMuted = false;
+
+//play a one-shot sound effect (clones the node so overlapping plays don't cut each other off)
+function playSfx(name) {
+  if (audioMuted) 
+    return;
+  const template = sfxLibrary[name];
+  if (!template) 
+    return;
+  const node = template.cloneNode();
+  node.volume = template.volume;
+  node.play().catch(() => {}); //ignore errors if file isn't added yet or autoplay is blocked
+}
+
+function playBgm() {
+  bgm.currentTime = 0;
+  if (!audioMuted) {
+    bgm.play().catch(() => {});
+  }
+}
+
+function stopBgm() {
+  bgm.pause();
+  bgm.currentTime = 0;
+}
+
+//mute sound
+function setAudioMuted(muted) {
+  audioMuted = muted;
+  bgm.muted = muted;
+  if (muted) {
+    bgm.pause();
+  } 
+  else if (gameActive) {
+    bgm.play().catch(() => {});
+  }
+  if (muteButton) {
+    muteButton.textContent = muted ? "🔇" : "🔊";
+    muteButton.setAttribute("aria-label", muted ? "Unmute sound" : "Mute sound");
+  }
+}
+
+const muteButton = document.getElementById("mute-btn");
+if (muteButton) {
+  muteButton.addEventListener("click", () => setAudioMuted(!audioMuted));
+}
+
+
 startButton.addEventListener("click", startGame);
 playAgainButton.addEventListener("click",startGame);
 let timerInterval = null;
@@ -119,6 +219,7 @@ function maybeAnnounceRushHour(){
   return;
 
   rushHourAnnounced = true;
+  playSfx("rushHour");
   const banner = document.getElementById("rush-hour-banner");
   banner.classList.remove("show");
   void banner.offsetWidth;
@@ -395,11 +496,13 @@ ingredientEls.forEach((ingredient) =>{
         if (activeDrag.ingredientName === expected){
           compartment.textContent = ITEM_EMOJI[activeDrag.ingredientName];
           compartment.classList.add("filled");
+          playSfx("correct");
           checkBoxComplete(box);
         }
         else{
           box.mistakeMade = true;
           compartment.classList.add("wrong");
+          playSfx("wrong");
           setTimeout(()=>compartment.classList.remove("wrong"),350);
         }
       }
@@ -569,6 +672,7 @@ function checkBoxComplete(box){
   box.timerFill.style.width = "100%";
   box.timerFill.style.background = "var(--accent-3)";
   box.lockHint.textContent = "Drag this box down to the van!";
+  playSfx("ready");
 }
 
 //box delivered
@@ -583,12 +687,14 @@ function deliverBox(box){
   updateHUD();
   box.el.classList.remove("ready");
   box.el.classList.add("delivered");
+  playSfx("deliver");
   removeBox(box);
 }
 
 //box ran out of time before completed
 function missBox(box){
   box.el.classList.add("failed");
+  playSfx("miss");
   removeBox(box);
 }
 
@@ -625,6 +731,8 @@ function tickBelt(){
 //start game function
 function startGame() {
   // Game start logic here
+  playSfx("click");
+  playBgm();
   clearInterval(timerInterval);
 
   timeLeft = starting_seconds;
@@ -669,6 +777,9 @@ function endGame() {
   clearInterval(timerInterval);
   timerInterval = null;
   gameActive = false;
+
+  stopBgm();
+
 
   endDrag();
   timerDisplay.textContent = "⏱ 00:00";
