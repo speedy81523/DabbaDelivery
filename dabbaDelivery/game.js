@@ -632,7 +632,7 @@ function spawnBox(){
   converyorTrack.appendChild(el);
   setTimeout(()=>el.classList.remove("pop-in"),350);
   
-  el.style.top = `${getBoxTopOffset(lane, el.offsetHeight)}px`;;
+   el.style.top = `${getBoxTopOffset(lane)}px`;
   //box details
   const box = {
     id,

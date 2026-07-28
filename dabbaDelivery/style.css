@@ -250,6 +250,7 @@ h1{
   position: relative;
   min-height: clamp(260px,48vh,480px);
   padding: 18px 10px 40px;
+  
   overflow: hidden;
 }
 
