@@ -104,7 +104,6 @@ h1{
   align-items: start;
 }
 
-
 .left-panel,.right-panel{
   display:flex;
   flex-direction:column;
@@ -158,6 +157,7 @@ h1{
   flex-direction: column;
   gap: 16px;
 }
+
 .rush-hour-banner{
   position: absolute;
   top: 40%;
@@ -390,7 +390,6 @@ h1{
   font-weight: 600;
 }
 
-
 .ingredient-list{
   display: grid;
   gap: 10px;
@@ -467,6 +466,7 @@ h1{
 .bento-box.pop-in {
   animation: popIn 0.35s ease;
 }
+
 
 .bento-box.ready {
   cursor: grab;
