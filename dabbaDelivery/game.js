@@ -201,7 +201,7 @@ function updateScoreDisplay() {
 //get box duration (movement speed ramps up)
 function getBoxDuration() {
   const elapsedFraction = 1 - timeLeft / starting_seconds;
-  const duration = 12 - elapsedFraction * 4;
+  const duration = 13 - elapsedFraction * 4;
   return Math.max(6, Math.round(duration));
 }
 
