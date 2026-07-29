@@ -670,7 +670,6 @@ h1{
     align-items: flex-start;
   }
 
-
   .conveyor {
     padding: 14px;
   }
@@ -704,11 +703,14 @@ h1{
     min-height: 24px;
   }
 
+  .compartment.filled{
+    font-size:1.1rem;
+  }
+
   .status-pill span {
     padding: 8px 12px;
     font-size: 0.9rem;
   }
-
 
   .bubble {
     width: 26px;
@@ -725,10 +727,12 @@ h1{
   .app-shell{
     padding: 18px 24px;
   }
+
   .top-bar{
     padding: 16px 22px;
     margin-bottom: 14px;
   }
+
   .game-layout{
     gap:16px;
   }
@@ -788,5 +792,194 @@ h1{
 
   .hud-item{
     padding: 8px 10px;
+  }
+}
+
+@media(max-height: 500px) and (orientation: landscape){
+  .app-shell{
+    padding: 8px max(10px,env(safe-area-inset-right)) 8px max(10px, env(safe-area-inset-left));
+    min-height: 100vh;
+  }
+
+  .top-bar{
+    padding: 6px 14px;
+    margin-bottom: 6px;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .top-bar .eyebrow, .top-bar .subtext{
+    display: none;
+  }
+  .top-bar h1{
+    font-size: 1.05rem;
+  }
+
+  .top-bar h1{
+    font-size: 1.05rem;
+  }
+
+  .compartment.filled{
+    font-size: 0.85rem;
+  }
+
+  .status-pill{
+    gap: 6px;
+  }
+
+  .status-pill span, .mute-btn{
+    padding: 6px 10px;
+    font-size: 0.78rem;
+  }
+
+  .left-panel{
+    display: none;
+  }
+
+  .game-layout{
+    grid-template-columns: minmax(0,1fr) 168px;
+    gap: 10px;
+  }
+
+  .right-panel{
+    gap: 8px;
+  }
+
+  .card{
+    padding: 8px 10px;
+    border-radius: 14px;
+  }
+
+  .card h2{
+    font-size: 0.75rem;
+    margin-bottom: 5px;
+  }
+
+  .ingredient-group-label{
+    font-size: 0.62rem;
+    margin: 5px 0 3px;
+  }
+
+  .ingredient-list{
+    gap: 4px;
+  }
+
+  .ingredient{
+    padding: 4px 6px;
+    gap: 6px;
+    font-size: 0.68rem;
+    border-radius: 10px;
+  }
+
+  .action-card{
+    gap: 6px;
+  }
+
+  .play-btn{
+    padding: 7px 12px;
+    font-size: 0.8rem;
+  }
+
+  .stage-top{
+    gap: 6px;
+  }
+
+  .hud-item{
+    padding: 5px 8px;
+    font-size: 0.68rem;
+    min-width: 0;
+    border-radius: 10px;
+  }
+  
+  .rush-hour-banner{
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+
+  .conveyor{
+    padding: 6px;
+    border-radius: 16px;
+  }
+
+  .conveyor-track{
+    min-height: clamp(120px,42vh,190px);
+    padding: 10px 6px 22px;
+  }
+
+  .bento-box{
+    width: 240px;
+    padding: 8px;
+    border-radius:14px;
+  }
+
+  .bubble-row{
+    gap:5px;
+    margin-bottom:5px;
+  }
+
+  .bubble{
+    width: 20px;
+    height:20px;
+    font-size:0.65rem;
+  }
+
+  .bubble-base{
+    width:22px;
+    height:22px;
+    font-size:0.72rem;
+  }
+
+  .box-timer{
+    height:4px;
+    margin-bottom:4px;
+  }
+
+  .bento-grid{
+    gap:4px;
+    padding:4px;
+  }
+
+  .compartment{
+    min-height:18px;
+    font-size:0.62rem;
+  }
+
+  .lock-hint{
+    margin-top:6px;
+    font-size:0.58rem;
+  }
+
+  .delivery-zone{
+    padding:6px 12px;
+    gap:8px;
+    border-radius:14px;
+  }
+
+  .delivery-bike{
+    font-size:1.6rem;
+  }
+
+  .delivery-hint{
+    font-size:0.65rem;
+  }
+
+  .game-over-card{
+    padding:20px 22px;
+    border-radius:20px;
+  }
+
+  .game-over-label{
+    font-size:0.68rem;
+  }
+
+  .game-over-score{
+    font-size:2rem;
+    margin-bottom:8px;
+  }
+
+  .game-over-stats{
+    font-size:0.75rem;
+    margin-bottom:16px;
   }
 }
