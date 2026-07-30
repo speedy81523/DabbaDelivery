@@ -812,10 +812,7 @@ h1{
   .top-bar .eyebrow, .top-bar .subtext{
     display: none;
   }
-  .top-bar h1{
-    font-size: 1.05rem;
-  }
-
+  
   .top-bar h1{
     font-size: 1.05rem;
   }
@@ -827,7 +824,7 @@ h1{
   .status-pill{
     gap: 6px;
   }
-
+  
   .status-pill span, .mute-btn{
     padding: 6px 10px;
     font-size: 0.78rem;
