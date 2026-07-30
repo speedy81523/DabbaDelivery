@@ -812,7 +812,7 @@ h1{
   .top-bar .eyebrow, .top-bar .subtext{
     display: none;
   }
-  
+
   .top-bar h1{
     font-size: 1.05rem;
   }
@@ -961,6 +961,7 @@ h1{
   .delivery-hint{
     font-size:0.65rem;
   }
+  
 
   .game-over-card{
     padding:20px 22px;
